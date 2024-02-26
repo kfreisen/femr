@@ -17,6 +17,7 @@ import msgpack
 import numpy as np
 import optax
 import sklearn.metrics
+import tqdm
 
 import femr.datasets
 import femr.extension.dataloader
@@ -352,6 +353,8 @@ def train_model() -> None:
         event_times = []
         labels = []
 
+        pbar = tqdm(total=num_to_get, desc="Computing loss")
+
         for i in range(num_to_get):
             batch = loader_to_eval.get_batch(split_to_eval, i)
             if batch["num_indices"] == 0:
@@ -377,6 +380,9 @@ def train_model() -> None:
                 else:
                     logits.append(logit[: batch["num_indices"]])
                     labels.append(batch["task"]["labels"][: batch["num_indices"]])
+
+            pbar.update(1)
+        pbar.close()
 
         loss = float(total_loss / total_indices)
         loss2 = float(total_loss2 / total_indices2)
@@ -524,6 +530,8 @@ def train_model() -> None:
 
     last_good = None
 
+    pbar = tqdm(total=total_steps)
+
     while True:
         next_item = batches.get_next()
         if next_item is None:
@@ -533,6 +541,8 @@ def train_model() -> None:
 
         if batch is None:
             continue
+
+        pbar.update(1)
 
         if step % 100 == 0:
             logging.info(f"[Step {step}]")
@@ -605,6 +615,7 @@ def train_model() -> None:
             config,
             batch,
         )
+    pbar.close()
 
 
 def new_compute_representations() -> None:
@@ -846,7 +857,7 @@ def compute_representations() -> None:
     results = []
 
     for split in ("train", "dev", "test"):
-        for dev_index in range(loader.get_number_of_batches(split)):
+        for dev_index in range(tqdm(loader.get_number_of_batches(split), descr=f"Computing representations for {split}")):
             raw_batch = loader.get_batch(split, dev_index)
             batch = jax.tree_map(lambda a: jnp.array(a), raw_batch)
 
