@@ -17,7 +17,7 @@ import msgpack
 import numpy as np
 import optax
 import sklearn.metrics
-import tqdm
+from tqdm import tqdm
 
 import femr.datasets
 import femr.extension.dataloader
