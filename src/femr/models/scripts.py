@@ -357,6 +357,7 @@ def train_model() -> None:
 
         for i in range(num_to_get):
             batch = loader_to_eval.get_batch(split_to_eval, i)
+            logging.info(f"Got batch {i}")
             if batch["num_indices"] == 0:
                 print("Skipping ", i, " due to no indices")
                 continue
