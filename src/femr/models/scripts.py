@@ -629,7 +629,7 @@ def new_compute_representations() -> None:
 
     args = parser.parse_args()
 
-    with open(os.path.join(args.model_path, "model", "config.msgpack"), "rb") as f:
+    with open(os.path.join(args.model_path, "config.msgpack"), "rb") as f:
         config = msgpack.load(f, use_list=False)
 
     random.seed(config["seed"])
