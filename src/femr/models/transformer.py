@@ -9,6 +9,7 @@ import optax
 from jax import debug, random
 
 import femr.jax
+from femr.models.attention import flash_attention_wrapper
 
 
 # From https://github.com/kingoflolz/mesh-transformer-jax
@@ -124,7 +125,8 @@ class TransformerBlock(hk.Module):
         if hk.running_init():
             attn = jnp.zeros_like(q)
         else:
-            attn = femr.jax.local_attention(q, k, v, length_mask, self.config["attention_width"])
+            attn = flash_attention_wrapper(q, k, v, length_mask, self.config["attention_width"])
+            # attn = femr.jax.local_attention(q, k, v, length_mask, self.config["attention_width"])
 
         def move_out_of_batch(val):
             with_head_at_start = val.transpose((1, 0, 2))
