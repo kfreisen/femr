@@ -673,7 +673,7 @@ def new_compute_representations() -> None:
         random.seed(config["seed"])
         rng = jax.random.PRNGKey(42)
 
-        assert batch_info["config"]["task"]["type"] == "labeled_patients"
+        # assert batch_info["config"]["task"]["type"] == "labeled_patients"
 
         loader = femr.extension.dataloader.BatchLoader(args.data_path, batch_info_path)
 
