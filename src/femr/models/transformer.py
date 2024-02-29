@@ -125,7 +125,7 @@ class TransformerBlock(hk.Module):
         if hk.running_init():
             attn = jnp.zeros_like(q)
         else:
-            attn = flash_attention_wrapper(q, k, v, length_mask, self.config["attention_width"])
+            attn = flash_attention_wrapper(q, k, v, self.config["attention_width"])
             # attn = femr.jax.local_attention(q, k, v, length_mask, self.config["attention_width"])
 
         def move_out_of_batch(val):
