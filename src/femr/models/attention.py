@@ -1,4 +1,4 @@
-from flash_attn_jax import flash_mha
+from flash_attention_jax import causal_flash_attention
 import functools
 
 

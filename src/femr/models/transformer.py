@@ -75,6 +75,11 @@ class TransformerBlock(hk.Module):
                 stddev=2 / (self.config["n_layers"] * jnp.sqrt(self.config["hidden_size"]))
             ),
         )
+        self.head_size = self.config["hidden_size"] // self.config["n_heads"]
+        self.mah = hk.MultiHeadAttention(
+            self.config["n_heads"],
+            self.head_size,
+        )
 
     def __call__(self, x, normed_ages, pos_embed, batch, is_training):
         assert x.shape[1] == self.config["hidden_size"]
@@ -94,7 +99,6 @@ class TransformerBlock(hk.Module):
         else:
             middle = self.input_proj(x)
 
-        head_size = self.config["hidden_size"] // self.config["n_heads"]
 
         q, k, v, ff = jnp.split(
             middle,
@@ -107,7 +111,7 @@ class TransformerBlock(hk.Module):
             k = apply_rotary_pos_emb(k, pos_embed)
 
         def move_to_batch(val):
-            with_head = val.reshape((x.shape[0], self.config["n_heads"], head_size))
+            with_head = val.reshape((x.shape[0], self.config["n_heads"], self.head_size))
             with_head_at_start = with_head.transpose((1, 0, 2))
             return with_head_at_start
 
@@ -125,7 +129,8 @@ class TransformerBlock(hk.Module):
         if hk.running_init():
             attn = jnp.zeros_like(q)
         else:
-            attn = flash_attention_wrapper(q, k, v, self.config["attention_width"])
+            attn = self.mah(q, k, v, length_mask)
+            # attn = flash_attention_wrapper(q, k, v, self.config["attention_width"])
             # attn = femr.jax.local_attention(q, k, v, length_mask, self.config["attention_width"])
 
         def move_out_of_batch(val):
