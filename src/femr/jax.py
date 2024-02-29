@@ -926,7 +926,7 @@ def local_attention_forward_xla_translation(
 local_attention_forward_p.def_abstract_eval(local_attention_forward_abstract_eval)
 local_attention_forward_p.def_impl(local_attention_fallback)
 local_attention_forward_p.multiple_results = True
-xla.register_translation(local_attention_forward_p, local_attention_forward_xla_translation)
+# xla.register_translation(local_attention_forward_p, local_attention_forward_xla_translation)
 
 local_attention_backward_p = core.Primitive("local_attention_backward")
 
@@ -1058,4 +1058,4 @@ def local_attention_backward_xla_translation(
 local_attention_backward_p.def_abstract_eval(local_attention_backward_abstract_eval)
 local_attention_backward_p.multiple_results = True
 local_attention_backward_p.def_impl(local_attention_backward_fallback)
-xla.register_translation(local_attention_backward_p, local_attention_backward_xla_translation)
+# xla.register_translation(local_attention_backward_p, local_attention_backward_xla_translation)
