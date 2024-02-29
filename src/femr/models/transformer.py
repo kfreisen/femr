@@ -79,7 +79,7 @@ class TransformerBlock(hk.Module):
             self.config["n_heads"],
             self.head_size,
             # w_init=hk.initializers.TruncatedNormal(stddev=1 / jnp.sqrt(self.head_size)),
-            w_init_scale=1 / jnp.sqrt(self.head_size),
+            w_init_scale=1# / jnp.sqrt(self.head_size),
         )
 
     def __call__(self, x, normed_ages, pos_embed, batch, is_training):
