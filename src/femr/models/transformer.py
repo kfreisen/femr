@@ -9,7 +9,6 @@ import optax
 from jax import debug, random
 
 import femr.jax
-from femr.models.attention import flash_attention_wrapper
 
 
 # From https://github.com/kingoflolz/mesh-transformer-jax
