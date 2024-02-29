@@ -78,7 +78,7 @@ class TransformerBlock(hk.Module):
         self.mah = hk.MultiHeadAttention(
             self.config["n_heads"],
             self.head_size,
-            w_init=hk.initializers.VarianceScaling(scale=1 / jnp.sqrt(self.head_size)),
+            w_init=hk.initializers.VarianceScaling(scale=1),
         )
 
     def __call__(self, x, normed_ages, pos_embed, batch, is_training):
