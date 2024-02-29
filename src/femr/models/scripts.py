@@ -17,6 +17,7 @@ import msgpack
 import numpy as np
 import optax
 import sklearn.metrics
+from tqdm import tqdm
 
 import femr.datasets
 import femr.extension.dataloader
@@ -352,8 +353,11 @@ def train_model() -> None:
         event_times = []
         labels = []
 
+        pbar = tqdm(total=num_to_get, desc="Computing loss")
+
         for i in range(num_to_get):
             batch = loader_to_eval.get_batch(split_to_eval, i)
+            logging.info(f"Got batch {i}")
             if batch["num_indices"] == 0:
                 print("Skipping ", i, " due to no indices")
                 continue
@@ -377,6 +381,9 @@ def train_model() -> None:
                 else:
                     logits.append(logit[: batch["num_indices"]])
                     labels.append(batch["task"]["labels"][: batch["num_indices"]])
+
+            pbar.update(1)
+        pbar.close()
 
         loss = float(total_loss / total_indices)
         loss2 = float(total_loss2 / total_indices2)
@@ -524,6 +531,8 @@ def train_model() -> None:
 
     last_good = None
 
+    pbar = tqdm(total=total_steps)
+
     while True:
         next_item = batches.get_next()
         if next_item is None:
@@ -533,6 +542,8 @@ def train_model() -> None:
 
         if batch is None:
             continue
+
+        pbar.update(1)
 
         if step % 100 == 0:
             logging.info(f"[Step {step}]")
@@ -605,6 +616,7 @@ def train_model() -> None:
             config,
             batch,
         )
+    pbar.close()
 
 
 def new_compute_representations() -> None:
@@ -614,10 +626,11 @@ def new_compute_representations() -> None:
     parser.add_argument("--model_path", type=str, required=True)
     parser.add_argument("--prediction_times_path", type=str, required=False)
     parser.add_argument("--batch_size", type=int, default=(1 << 12), required=False)
+    parser.add_argument("--dictionary_path", type=str, required=True)
 
     args = parser.parse_args()
 
-    with open(os.path.join(args.model_path, "model", "config.msgpack"), "rb") as f:
+    with open(os.path.join(args.model_path, "config.msgpack"), "rb") as f:
         config = msgpack.load(f, use_list=False)
 
     random.seed(config["seed"])
@@ -628,19 +641,23 @@ def new_compute_representations() -> None:
         batches_path = os.path.join(tmpdir, "task_batches")
 
         command = f"clmbr_create_batches {tmpdir}/task_batches --data_path {args.data_path}"
-        command += f" --task labeled_patients --labeled_patients_path {args.prediction_times_path} --val_start 70"
-        command += f" --dictionary_path {args.model_path}/dictionary"
+        command += " --task clmbr "
+        # command += f"--labeled_patients_path {args.prediction_times_path} "
+        command += "--val_start 70"
+        command += f" --dictionary_path {args.dictionary_path}"
         if config["transformer"]["is_hierarchical"]:
             command += " --is_hierarchical"
         command += f" --transformer_vocab_size {config['transformer']['vocab_size']}"
         command += f" --batch_size {args.batch_size}"
+        print(f"Running command: {command}")
         os.system(command)
+        print("command complete")
 
         batch_info_path = os.path.join(batches_path, "batch_info.msgpack")
 
         database = femr.datasets.PatientDatabase(args.data_path)
 
-        with open(os.path.join(args.model_path, "model", "best"), "rb") as f:
+        with open(os.path.join(args.model_path, "best"), "rb") as f:
             params = pickle.load(f)
 
         params = femr.models.transformer.convert_params(params, dtype=jnp.float16)
@@ -648,7 +665,7 @@ def new_compute_representations() -> None:
         with open(batch_info_path, "rb") as f:
             batch_info = msgpack.load(f, use_list=False)
 
-        with open(os.path.join(args.model_path, "model", "config.msgpack"), "rb") as f:
+        with open(os.path.join(args.model_path, "config.msgpack"), "rb") as f:
             config = msgpack.load(f, use_list=False)
 
         config = hk.data_structures.to_immutable_dict(config)
@@ -656,7 +673,7 @@ def new_compute_representations() -> None:
         random.seed(config["seed"])
         rng = jax.random.PRNGKey(42)
 
-        assert batch_info["config"]["task"]["type"] == "labeled_patients"
+        # assert batch_info["config"]["task"]["type"] == "labeled_patients"
 
         loader = femr.extension.dataloader.BatchLoader(args.data_path, batch_info_path)
 
@@ -846,7 +863,9 @@ def compute_representations() -> None:
     results = []
 
     for split in ("train", "dev", "test"):
-        for dev_index in range(loader.get_number_of_batches(split)):
+        for dev_index in range(
+            tqdm(loader.get_number_of_batches(split), descr=f"Computing representations for {split}")
+        ):
             raw_batch = loader.get_batch(split, dev_index)
             batch = jax.tree_map(lambda a: jnp.array(a), raw_batch)
 
