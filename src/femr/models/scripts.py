@@ -646,7 +646,9 @@ def new_compute_representations() -> None:
             command += " --is_hierarchical"
         command += f" --transformer_vocab_size {config['transformer']['vocab_size']}"
         command += f" --batch_size {args.batch_size}"
+        print(f"Running command: {command}")
         os.system(command)
+        print("command complete")
 
         batch_info_path = os.path.join(batches_path, "batch_info.msgpack")
 
