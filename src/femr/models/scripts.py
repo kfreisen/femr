@@ -641,7 +641,7 @@ def new_compute_representations() -> None:
         batches_path = os.path.join(tmpdir, "task_batches")
 
         command = f"clmbr_create_batches {tmpdir}/task_batches --data_path {args.data_path}"
-        command += " --task labeled_patients "
+        command += " --task clmbr "
         # command += f"--labeled_patients_path {args.prediction_times_path} "
         command += "--val_start 70"
         command += f" --dictionary_path {args.dictionary_path}"
