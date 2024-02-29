@@ -652,7 +652,7 @@ def new_compute_representations() -> None:
 
         database = femr.datasets.PatientDatabase(args.data_path)
 
-        with open(os.path.join(args.model_path, "model", "best"), "rb") as f:
+        with open(os.path.join(args.model_path, "best"), "rb") as f:
             params = pickle.load(f)
 
         params = femr.models.transformer.convert_params(params, dtype=jnp.float16)
@@ -660,7 +660,7 @@ def new_compute_representations() -> None:
         with open(batch_info_path, "rb") as f:
             batch_info = msgpack.load(f, use_list=False)
 
-        with open(os.path.join(args.model_path, "model", "config.msgpack"), "rb") as f:
+        with open(os.path.join(args.model_path, "config.msgpack"), "rb") as f:
             config = msgpack.load(f, use_list=False)
 
         config = hk.data_structures.to_immutable_dict(config)
