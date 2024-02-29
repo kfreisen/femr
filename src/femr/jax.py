@@ -636,8 +636,7 @@ def _get_cached_local_attention_data(b: int, n: int, k: int, w: int, causal: boo
     """
     key = (b, n, k, w, causal)
     if key not in _local_attention_data_cache:
-        print(f"what is in the jax extension: {dir(femr.extension.jax)}")
-        _local_attention_data_cache[key] = femr.extension.jax.get_local_attention_data(b, n, k, w, causal)
+        _local_attention_data_cache[key] = femr.extension.jax.get_local_attention_shape(b, n, k, w, causal)
 
     # We need to pull out the actual pointer and pass that directly.
 
