@@ -79,6 +79,7 @@ class TransformerBlock(hk.Module):
             self.config["n_heads"],
             self.head_size,
             w_init=hk.initializers.VarianceScaling(scale=1),
+            model_size=self.config["hidden_size"]
         )
 
     def __call__(self, x, normed_ages, pos_embed, batch, is_training):
