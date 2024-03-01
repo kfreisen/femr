@@ -75,12 +75,6 @@ class TransformerBlock(hk.Module):
             ),
         )
         self.head_size = self.config["hidden_size"] // self.config["n_heads"]
-        self.mah = hk.MultiHeadAttention(
-            self.config["n_heads"],
-            self.head_size,
-            w_init=hk.initializers.VarianceScaling(scale=1),
-            model_size=self.config["hidden_size"]
-        )
 
     def __call__(self, x, normed_ages, pos_embed, batch, is_training):
         assert x.shape[1] == self.config["hidden_size"]
@@ -130,7 +124,13 @@ class TransformerBlock(hk.Module):
         if hk.running_init():
             attn = jnp.zeros_like(q)
         else:
-            attn = self.mah(q, k, v, length_mask)
+            mah = hk.MultiHeadAttention(
+                self.config["n_heads"],
+                self.head_size,
+                w_init=hk.initializers.VarianceScaling(scale=1),
+                model_size=self.config["hidden_size"]
+            )
+            attn = mah(q, k, v, length_mask)
             # attn = flash_attention_wrapper(q, k, v, self.config["attention_width"])
             # attn = femr.jax.local_attention(q, k, v, length_mask, self.config["attention_width"])
 
