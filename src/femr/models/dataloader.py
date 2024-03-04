@@ -249,9 +249,9 @@ def create_batches() -> None:
             birth_date = datetime.datetime.combine(data.get_patient_birth_date(pid), datetime.time.min)
 
             for label in labels:
-                age = (label.time - birth_date) / datetime.timedelta(minutes=1)
+                age = (label.time - birth_date) / datetime.timedelta(minutes=1)s
                 assert int(age) == age, f"Age must be in minutes {age}"
-                value: Any
+                value: Any = label.value
                 if labeled_patients.labeler_type == "boolean":
                     assert isinstance(label.value, bool)
                     value = label.value
