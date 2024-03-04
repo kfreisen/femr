@@ -618,6 +618,7 @@ def new_compute_representations() -> None:
 
 
     args = parser.parse_args()
+    print(f"args: {args}")
 
     with open(os.path.join(args.model_path, "model", "config.msgpack"), "rb") as f:
         config = msgpack.load(f, use_list=False)
