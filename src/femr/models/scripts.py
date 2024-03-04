@@ -612,9 +612,10 @@ def new_compute_representations() -> None:
     parser.add_argument("destination", type=str)
     parser.add_argument("--data_path", type=str, required=True)
     parser.add_argument("--model_path", type=str, required=True)
+    parser.add_argument("--batches_path", type=str, required=True)
     parser.add_argument("--prediction_times_path", type=str, required=False)
     parser.add_argument("--batch_size", type=int, default=(1 << 12), required=False)
-    parser.add_argument("--batches_path", type=str, required=False)
+
 
     args = parser.parse_args()
 
