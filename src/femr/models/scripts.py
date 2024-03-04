@@ -848,7 +848,7 @@ def compute_representations() -> None:
     for split in ("train", "dev", "test"):
         for dev_index in range(loader.get_number_of_batches(split)):
             raw_batch = loader.get_batch(split, dev_index)
-            batch = jax.tree_map(lambda a: jnp.array(a), raw_batch)
+            batch = jax.tree_map(lambda a: jax.device_put(a), raw_batch)
 
             repr, mask = compute_repr(
                 femr.models.transformer.convert_params(params, dtype=jnp.float16),
