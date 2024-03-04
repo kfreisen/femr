@@ -865,7 +865,7 @@ def compute_representations() -> None:
                 r = repr[i, :]
 
                 label_pid = raw_batch["patient_ids"][p_index[i]]
-                label_age = raw_batch["task"]["label_ages"][i]
+                # label_age = raw_batch["task"]["label_ages"][i]
                 label_value = raw_batch["task"]["labels"][i]
 
                 offset = raw_batch["offsets"][p_index[i]]
